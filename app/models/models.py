@@ -28,9 +28,12 @@ class BlogPost(db.Document):
 	timestamp = db.DateTimeField()
 	author = db.StringField() # user_id 
 	body = db.StringField()
+	tags = db.StringField()
 
 	def to_json(self):
-		return {'title' : self.title,
+		print self.id
+		return {'id'	: str(self.id),
+				'title' : self.title,
 				'author': self.author,
 				'body'	: self.body,
 				'timestamp' : self.timestamp}

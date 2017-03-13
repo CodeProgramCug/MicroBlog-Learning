@@ -73,21 +73,27 @@
 
 /* Post View */
 .post-preview a {
-	color: #2d2d30;
+	/*color: #2d2d30;*/
 }
 
 
 .post-title{
-	color: #2d2d30;
+	/*color: #2d2d30;*/
 }
 .post-subtitle {
-	color: #2d2d30;
+	/*color: #2d2d30;*/
 }
 
  .post-meta {
-	color: #2d2d30;
+	/*color: #2d2d30;*/
 }
 
 .next a {
-	color: #2d2d30;
+	/*color: #2d2d30;*/
+}
+
+.peopleCarouselImg {
+  width: auto;
+  height: 400px;
+  max-height: 400px;
 }

@@ -1,15 +1,16 @@
 from app import app
 from app import db, login_manager
-from flask import render_template, flash, redirect, session, url_for, g
-from models.forms import LoginForm
+from flask import render_template, flash, redirect, session, url_for, g, request
+from models.forms import LoginForm, BlogEditor
 from models.models import User, BlogPost
 from datetime import datetime
 from flask_login import login_user, logout_user, current_user, login_required
+from bson.objectid import ObjectId
 
 @login_manager.user_loader
 def load_user(user_id):
 #	return User.query.get(int(id))
-	print user_id
+	# print user_id
 	return User.objects(id=user_id).first()
 
 @app.before_request
@@ -20,16 +21,15 @@ def before_request():
 @app.route('/')
 @app.route('/index')
 def index():
-	user = g.user;
+	user = g.user
 	# user = { 'nickname': 'Miguel' } # fake user
 	posts = []
 	for post in BlogPost.objects:
 		print "lalala"
 		posts.append( post.to_json() )
-	print posts
+	# print posts
 	return render_template("index.html",
     			title = 'Home',
-			    user = user,
 				posts = posts)
 
 
@@ -61,19 +61,54 @@ def logout():
 @app.route('/test')
 @login_required
 def test():
-	BlogPost(\
-		title = "lalalla", \
-		timestamp = datetime(2017,2,26), \
-		author = "tyx",\
-		body = "lalaland,laland").save()
 	return "yes, you are allowed"
 
-@app.route('/addpost')
+@app.route('/edit', methods = ['GET', 'POST'])
 @login_required
-def addpost():
-	return "lalaland"
+def edit():
+	form = BlogEditor()
+	postid = request.args.get('postid')
+	if postid:
+		post = BlogPost.objects.get(id=postid)
+	else:
+		post = []
+	# if post:
+		# form.text = post.body
+	if form.validate_on_submit():
+		if post:
+			post.update(title = form.title.data, \
+						body=form.text.data, \
+						timestamp = datetime.now(), \
+				 		tags = form.tags.data)
+		else:
+			BlogPost(\
+		         title = form.title.data ,\
+				 body = form.text.data, \
+				 timestamp = datetime.now(), \
+				 tags = form.tags.data).save()
 
+		post = BlogPost.objects.get(title = form.title.data).to_json()
+		user = g.user
+		return render_template("blog.html", post=post, user = user)
+		
+	return render_template("edit.html", form=form, post=post)
 
+@app.route('/blog')
+def blog_by_id():
+	postid = request.args.get('postid')
+	post = BlogPost.objects.get(id=postid).to_json()
+	user = g.user
+	return render_template("blog.html",post=post, user=user)
 
+@app.route('/delete')
+def delete():
+	postid = request.args.get('postid')
+	post = BlogPost.objects.get(id=postid)
+	if post:
+		post.delete()
+		flash("successfully delete")
+	else:
+		flash()
+	return redirect(url_for("index"))
 
 
